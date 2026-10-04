@@ -1,7 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias \"@/*\" --use-npm --turbopack=false --yes)"
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir=false --import-alias \"@/*\" --use-npm --turbopack=false --yes)",
+      "Bash(npm install *)",
+      "Bash(rm -f AGENTS.md CLAUDE.md)",
+      "Bash(tail -80 /tmp/ksobota-dev.log)",
+      "Read(//private/tmp/**)",
+      "Bash(sips -g all public/assets/KS_logo.png)",
+      "Bash(python3 -c ' *)",
+      "Bash(pip3 list *)",
+      "Bash(python3 -c \"import PIL\")",
+      "Bash(node -e \"console.log\\(require\\('sharp'\\)\\)\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('sharp'\\)\\)\")",
+      "Bash(npm ls *)",
+      "Bash(node -e ' *)",
+      "Bash(grep -n \"^$\" /private/tmp/claude-501/-Users-bartek-Desktop-projects-ksobota-shop/a50b706b-a5e7-44ce-9cf5-d7d2404f7039/tasks/bbf0g1l79.output)"
+    ],
+    "additionalDirectories": [
+      "/Users/bartek/Desktop/projects/ksobczak-shop"
     ]
   }
 }

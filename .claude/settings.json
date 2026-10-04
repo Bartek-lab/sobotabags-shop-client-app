@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sysctl -n hw.ncpu hw.physicalcpu hw.logicalcpu)",
+      "Bash(sed -i '' \"s|require\\('sharp'\\)|require\\('/Users/bartek/Desktop/projects/ksobota-shop/node_modules/sharp'\\)|\" /tmp/gen-swatches.js)",
+      "Bash(sed -i '' \"s|const OUT_DIR = .*|// unused|\" /tmp/gen-swatches.js)",
+      "Bash(node /tmp/gen-swatches.js)",
+      "Bash(lsof -iTCP:3000 -sTCP:LISTEN -Pn)",
+      "Skill(run)",
+      "Skill(run:*)"
+    ]
+  }
+}
