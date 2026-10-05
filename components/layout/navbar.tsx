@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Menu, ShoppingBag, User as UserIcon } from "lucide-react";
+import { Menu, ShoppingBag, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Logo } from "@/components/shared/logo";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -77,16 +78,15 @@ export function Navbar() {
                 }
               />
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <p className="text-sm font-medium">{user.fullName}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem render={<Link href="/account">Moje konto</Link>} />
-                {user.role === "admin" && (
-                  <DropdownMenuItem render={<Link href="/admin">Panel administracyjny</Link>} />
-                )}
-                <DropdownMenuItem onClick={handleLogout}>Wyloguj się</DropdownMenuItem>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="font-normal">
+                    <p className="text-sm font-medium">{user.fullName}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem render={<Link href="/account">Moje konto</Link>} />
+                  <DropdownMenuItem onClick={handleLogout}>Wyloguj się</DropdownMenuItem>
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -146,16 +146,6 @@ export function Navbar() {
                     >
                       Moje konto
                     </Link>
-                    {user.role === "admin" && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 rounded-md px-2 py-2.5 text-sm hover:bg-muted"
-                      >
-                        <LayoutDashboard className="size-4" />
-                        Panel administracyjny
-                      </Link>
-                    )}
                     <button
                       onClick={() => {
                         setOpen(false);

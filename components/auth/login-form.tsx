@@ -25,9 +25,9 @@ export function LoginForm() {
     const password = String(formData.get("password") ?? "");
 
     try {
-      const user = await login({ email, password });
+      await login({ email, password });
       toast.success("Witaj z powrotem!");
-      router.push(user.role === "admin" ? "/admin/products" : "/account");
+      router.push("/account");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nie udało się zalogować.");
     }

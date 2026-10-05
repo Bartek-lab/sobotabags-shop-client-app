@@ -4,14 +4,16 @@ import * as React from "react";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 
-import type { CartLine, Product } from "@/types";
 import { useCartStore } from "@/lib/cart";
 import { CartItemRow } from "@/components/cart/cart-item-row";
 import { CartSummary } from "@/components/cart/cart-summary";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function CartView({ products }: { products: Product[] }) {
+// No longer takes a `products` prop: every CartItem snapshots what it needs
+// to render itself (name, image, price, chosen options) at add-to-cart
+// time, so there's nothing left to cross-reference against a product list.
+export function CartView() {
   const [mounted, setMounted] = React.useState(false);
   const items = useCartStore((state) => state.items);
   const setQuantity = useCartStore((state) => state.setQuantity);
@@ -19,16 +21,7 @@ export function CartView({ products }: { products: Product[] }) {
 
   React.useEffect(() => setMounted(true), []);
 
-  const lines: CartLine[] = React.useMemo(() => {
-    return items
-      .map((item) => {
-        const product = products.find((p) => p.id === item.productId);
-        return product ? { ...item, product } : null;
-      })
-      .filter((line): line is CartLine => line !== null);
-  }, [items, products]);
-
-  const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (!mounted) {
     return (
@@ -42,7 +35,7 @@ export function CartView({ products }: { products: Product[] }) {
     );
   }
 
-  if (lines.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 rounded-sm border border-dashed border-border py-24 text-center">
         <ShoppingBag className="size-8 text-muted-foreground" strokeWidth={1.5} />
@@ -58,12 +51,12 @@ export function CartView({ products }: { products: Product[] }) {
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
       <div>
-        {lines.map((line) => (
+        {items.map((item) => (
           <CartItemRow
-            key={line.productId}
-            line={line}
-            onQuantityChange={(quantity) => setQuantity(line.productId, quantity)}
-            onRemove={() => removeItem(line.productId)}
+            key={item.variantId}
+            item={item}
+            onQuantityChange={(quantity) => setQuantity(item.variantId, quantity)}
+            onRemove={() => removeItem(item.variantId)}
           />
         ))}
       </div>

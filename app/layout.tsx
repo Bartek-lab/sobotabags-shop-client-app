@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { PageTransition } from "@/components/shared/page-transition";
+import { AuthInitializer } from "@/components/shared/auth-initializer";
 import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
@@ -43,6 +44,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <AuthInitializer />
           <Navbar />
           <main className="flex-1">
             <PageTransition>{children}</PageTransition>

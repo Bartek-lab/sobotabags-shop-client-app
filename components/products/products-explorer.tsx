@@ -1,14 +1,12 @@
 "use client";
 
-import * as React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 
-import type { Product, ProductCategory, SortOption } from "@/types";
-import { filterProducts, sortProducts } from "@/lib/products";
-import { formatPrice } from "@/lib/utils";
+import type { Category, ProductSummary, SortOption } from "@/types";
+import { SORT_OPTIONS } from "@/lib/products";
 import { ProductGrid } from "@/components/products/product-grid";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -18,77 +16,60 @@ import {
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-type CategoryFilter = ProductCategory | "all";
-
-const CATEGORY_OPTIONS: { value: CategoryFilter; label: string }[] = [
-  { value: "all", label: "Wszystkie" },
-  { value: "women", label: "Damskie" },
-  { value: "men", label: "Męskie" },
-];
-
-const SORT_OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "featured", label: "Polecane" },
-  { value: "newest", label: "Najnowsze" },
-  { value: "price-asc", label: "Cena: od najniższej" },
-  { value: "price-desc", label: "Cena: od najwyższej" },
-];
-
+// Filtering/sorting happens server-side now (api-shop), not over an
+// already-loaded array -- this component only reflects URL search params
+// and asks the server page to re-fetch by pushing new ones. No price-range
+// filter here: api-shop doesn't support it yet (category + sort only), so
+// it's dropped rather than faked client-side over an already-filtered list.
 export function ProductsExplorer({
   products,
-  initialCategory,
-  priceBounds,
+  categories,
+  activeCategory,
+  activeSort,
 }: {
-  products: Product[];
-  initialCategory: CategoryFilter;
-  priceBounds: { min: number; max: number };
+  products: ProductSummary[];
+  categories: Category[];
+  activeCategory?: string;
+  activeSort: SortOption;
 }) {
-  const [category, setCategory] = React.useState<CategoryFilter>(initialCategory);
-  const [priceRange, setPriceRange] = React.useState<[number, number]>([priceBounds.min, priceBounds.max]);
-  const [sort, setSort] = React.useState<SortOption>("featured");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const filtered = React.useMemo(() => {
-    const byFilters = filterProducts(products, {
-      category,
-      minPrice: priceRange[0],
-      maxPrice: priceRange[1],
-    });
-    return sortProducts(byFilters, sort);
-  }, [products, category, priceRange, sort]);
+  function updateParam(key: string, value: string | undefined) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set(key, value);
+    else params.delete(key);
+    router.push(`${pathname}?${params.toString()}`);
+  }
 
   const filterPanel = (
-    <div className="space-y-8">
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium">Kategoria</h3>
-        <div className="flex flex-col gap-1.5">
-          {CATEGORY_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => setCategory(option.value)}
-              className={`rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors ${
-                category === option.value
-                  ? "bg-secondary font-medium text-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium">Cena</h3>
-        <Slider
-          min={priceBounds.min}
-          max={priceBounds.max}
-          step={50}
-          value={priceRange}
-          onValueChange={(value) => setPriceRange(value as [number, number])}
-        />
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{formatPrice(priceRange[0])}</span>
-          <span>{formatPrice(priceRange[1])}</span>
-        </div>
+    <div className="space-y-3">
+      <h3 className="text-sm font-medium">Kategoria</h3>
+      <div className="flex flex-col gap-1.5">
+        <button
+          onClick={() => updateParam("category", undefined)}
+          className={`rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors ${
+            !activeCategory
+              ? "bg-secondary font-medium text-foreground"
+              : "text-muted-foreground hover:bg-muted"
+          }`}
+        >
+          Wszystkie
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => updateParam("category", cat.slug)}
+            className={`rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors ${
+              activeCategory === cat.slug
+                ? "bg-secondary font-medium text-foreground"
+                : "text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -116,11 +97,11 @@ export function ProductsExplorer({
             </SheetContent>
           </Sheet>
 
-          <p className="text-sm text-muted-foreground lg:hidden">{filtered.length} produktów</p>
+          <p className="text-sm text-muted-foreground lg:hidden">{products.length} produktów</p>
 
           <div className="ml-auto flex items-center gap-3">
-            <p className="hidden text-sm text-muted-foreground sm:block">{filtered.length} produktów</p>
-            <Select value={sort} onValueChange={(value) => setSort(value as SortOption)}>
+            <p className="hidden text-sm text-muted-foreground sm:block">{products.length} produktów</p>
+            <Select value={activeSort} onValueChange={(value) => updateParam("sort", value ?? undefined)}>
               <SelectTrigger size="sm" className="w-44">
                 <SelectValue placeholder="Sortuj" />
               </SelectTrigger>
@@ -135,7 +116,7 @@ export function ProductsExplorer({
           </div>
         </div>
 
-        <ProductGrid products={filtered} />
+        <ProductGrid products={products} />
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OrderHistory } from "@/components/account/order-history";
+import { AddressBook } from "@/components/account/address-book";
 
 export function AccountView({ orders }: { orders: Order[] }) {
   const { user, isReady } = useRequireAuth("/login");
@@ -52,6 +53,13 @@ export function AccountView({ orders }: { orders: Order[] }) {
           <LogOut className="size-4" />
           Wyloguj się
         </Button>
+      </section>
+
+      <Separator />
+
+      <section className="space-y-5">
+        <h2 className="font-display text-xl">Adresy</h2>
+        <AddressBook />
       </section>
 
       <Separator />

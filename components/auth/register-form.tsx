@@ -27,8 +27,17 @@ export function RegisterForm() {
 
     try {
       await register({ fullName, email, password });
-      toast.success("Konto zostało utworzone!");
-      router.push("/account");
+      // signUp() doesn't return an active session if this project requires
+      // email confirmation -- in that case the account was created but the
+      // person isn't logged in yet, so sending them to /account would just
+      // bounce them straight to /login. Send to a clear next step instead.
+      if (useAuthStore.getState().user) {
+        toast.success("Konto zostało utworzone!");
+        router.push("/account");
+      } else {
+        toast.success("Konto utworzone -- sprawdź e-mail, aby potwierdzić adres.");
+        router.push("/login");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Nie udało się zarejestrować.");
     }

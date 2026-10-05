@@ -1,7 +1,7 @@
-import type { Product } from "@/types";
+import type { ProductSummary } from "@/types";
 import { ProductCard } from "@/components/products/product-card";
 
-export function ProductGrid({ products }: { products: Product[] }) {
+export function ProductGrid({ products }: { products: ProductSummary[] }) {
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-sm border border-dashed border-border py-24 text-center">

@@ -1,8 +1,8 @@
-import type { Product } from "@/types";
+import type { ProductSummary } from "@/types";
 import { ProductGrid } from "@/components/products/product-grid";
 import { SectionHeading } from "@/components/shared/section-heading";
 
-export function RelatedProducts({ products }: { products: Product[] }) {
+export function RelatedProducts({ products }: { products: ProductSummary[] }) {
   if (products.length === 0) return null;
 
   return (

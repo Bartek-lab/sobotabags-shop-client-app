@@ -7,6 +7,14 @@ import { cn } from "@/lib/utils";
 export function ProductGallery({ images, name }: { images: string[]; name: string }) {
   const [active, setActive] = React.useState(0);
 
+  if (images.length === 0) {
+    return (
+      <div className="flex aspect-[4/5] items-center justify-center rounded-sm bg-muted text-sm text-muted-foreground">
+        Brak zdjęcia
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-muted">
