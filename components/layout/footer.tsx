@@ -26,13 +26,21 @@ const COLUMNS = [
       { href: "/contact", label: "Zamówienia indywidualne" },
     ],
   },
+  {
+    title: "Informacje prawne",
+    links: [
+      { href: "/regulamin", label: "Regulamin" },
+      { href: "/regulamin#prawo-odstapienia", label: "Zwroty i odstąpienie od umowy" },
+      { href: "/polityka-prywatnosci", label: "Polityka prywatności" },
+    ],
+  },
 ];
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-secondary/40">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-6">
           <div className="space-y-3 lg:col-span-2">
             <Logo showWordmark={false} markClassName="h-9" />
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -61,6 +69,12 @@ export function Footer() {
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} KS. Wszelkie prawa zastrzeżone.</p>
           <p>Wykonane ręcznie w Polsce.</p>
+        </div>
+        <div className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">
+          <p>
+            Sklep KS prowadzi Karolina Sobota, ul. Okrężna 24, 63-200 Jarocin, sobotabags@gmail.com — sprzedaż
+            w ramach działalności nierejestrowanej.
+          </p>
         </div>
       </div>
     </footer>

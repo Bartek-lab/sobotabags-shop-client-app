@@ -86,23 +86,71 @@ export interface User {
   createdAt: string;
 }
 
-export type OrderStatus = "processing" | "shipped" | "completed" | "cancelled";
-
-export interface OrderItem {
-  productId: string;
-  productName: string;
-  quantity: number;
-  price: number;
-}
+export type OrderStatus = "placed" | "completed" | "cancelled";
 
 export interface Order {
   id: string;
-  createdAt: string;
+  number: number;
   status: OrderStatus;
-  total: number;
-  items: OrderItem[];
-  customerName: string;
-  customerEmail: string;
+  paymentStatus: string;
+  /** Minor units. */
+  totalAmount: number;
+  createdAt: string;
+  placedAt: string | null;
+  itemCount: number;
+}
+
+export interface OrderLine {
+  productName: string;
+  variantLabel: string | null;
+  sku: string;
+  quantity: number;
+  /** Minor units. */
+  unitPriceAmount: number;
+  /** Minor units. */
+  totalAmount: number;
+  imageUrl: string | null;
+}
+
+export interface OrderAddress {
+  firstName: string;
+  lastName: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  postalCode: string;
+  countryCode: string;
+  phone: string | null;
+}
+
+export type WithdrawalStatus = "submitted" | "acknowledged" | "refunded" | "rejected";
+
+export interface Withdrawal {
+  id: string;
+  status: WithdrawalStatus;
+  requestedAt: string;
+}
+
+export interface OrderDetail {
+  id: string;
+  number: number;
+  status: OrderStatus;
+  paymentStatus: string;
+  subtotalAmount: number;
+  discountAmount: number;
+  shippingAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  createdAt: string;
+  placedAt: string | null;
+  cancelledAt: string | null;
+  shippingMethodName: string | null;
+  pickupPointName: string | null;
+  address: OrderAddress | null;
+  lines: OrderLine[];
+  withdrawal: Withdrawal | null;
+  /** Server-computed: not already withdrawn, status is 'placed', and within the withdrawal window. */
+  canWithdraw: boolean;
 }
 
 export type SortOption = "price-asc" | "price-desc" | "newest";

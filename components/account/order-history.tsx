@@ -1,6 +1,7 @@
+import Link from "next/link";
 import type { Order } from "@/types";
 import { ORDER_STATUS_LABEL, ORDER_STATUS_VARIANT } from "@/lib/orders";
-import { formatPrice } from "@/lib/utils";
+import { formatMinorUnits } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 function formatDate(iso: string) {
@@ -15,31 +16,26 @@ export function OrderHistory({ orders }: { orders: Order[] }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {orders.map((order) => (
-        <div key={order.id} className="rounded-sm border border-border p-5">
+        <Link
+          key={order.id}
+          href={`/account/orders/${order.id}`}
+          className="block rounded-sm border border-border p-5 transition-colors hover:bg-secondary/40"
+        >
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <p className="font-medium">Zamówienie {order.id}</p>
-              <p className="text-xs text-muted-foreground">{formatDate(order.createdAt)}</p>
+              <p className="font-medium">Zamówienie #{order.number}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatDate(order.createdAt)} · {order.itemCount} {order.itemCount === 1 ? "produkt" : "produkty"}
+              </p>
             </div>
-            <Badge variant={ORDER_STATUS_VARIANT[order.status]}>{ORDER_STATUS_LABEL[order.status]}</Badge>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium">{formatMinorUnits(order.totalAmount)}</span>
+              <Badge variant={ORDER_STATUS_VARIANT[order.status]}>{ORDER_STATUS_LABEL[order.status]}</Badge>
+            </div>
           </div>
-          <ul className="mt-4 space-y-1.5 border-t border-border pt-4">
-            {order.items.map((item) => (
-              <li key={item.productId} className="flex justify-between text-sm text-muted-foreground">
-                <span>
-                  {item.productName} × {item.quantity}
-                </span>
-                <span>{formatPrice(item.price * item.quantity)}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-3 flex justify-between border-t border-border pt-3 text-sm font-medium">
-            <span>Razem</span>
-            <span>{formatPrice(order.total)}</span>
-          </div>
-        </div>
+        </Link>
       ))}
     </div>
   );

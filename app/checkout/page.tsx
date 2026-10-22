@@ -2,23 +2,20 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
 import { useAuthStore } from "@/lib/auth";
 import { useCartStore } from "@/lib/cart";
-import { getShippingMethods } from "@/lib/shipping";
-import { getAddresses } from "@/lib/addresses";
-import {
-  createCheckoutSession,
-  getPricingPreview,
-  type CheckoutInput,
-  type PricingPreview,
-} from "@/lib/checkout";
+import { useShippingMethods } from "@/lib/hooks/use-shipping-methods";
+import { useAddresses } from "@/lib/hooks/use-addresses";
+import { usePricingPreview } from "@/lib/hooks/use-pricing-preview";
+import { createCheckoutSession, type CheckoutInput } from "@/lib/checkout";
 import { formatMinorUnits } from "@/lib/utils";
-import type { Address, AddressInput, ShippingMethod } from "@/types";
+import type { AddressInput } from "@/types";
 import { AddressFields, DEFAULT_COUNTRY_CODE, emptyAddress } from "@/components/checkout/address-fields";
 import { ShippingMethodPicker } from "@/components/checkout/shipping-method-picker";
-import { InPostGeowidget } from "@/components/checkout/inpost-geowidget";
+import { FurgonetkaMap } from "@/components/checkout/furgonetka-map";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -40,37 +37,18 @@ export default function CheckoutPage() {
     if (mounted && items.length === 0) router.replace("/cart");
   }, [mounted, items, router]);
 
-  const [methods, setMethods] = React.useState<ShippingMethod[]>([]);
-  const [methodsLoading, setMethodsLoading] = React.useState(true);
-  const [selectedMethodId, setSelectedMethodId] = React.useState<string | null>(null);
+  const { methods, loading: methodsLoading, selectedMethodId, setSelectedMethodId } = useShippingMethods();
 
-  React.useEffect(() => {
-    getShippingMethods()
-      .then((ms) => {
-        setMethods(ms);
-        if (ms.length) setSelectedMethodId(ms[0].id);
-      })
-      .catch(() => {})
-      .finally(() => setMethodsLoading(false));
-  }, []);
-
-  const [addresses, setAddresses] = React.useState<Address[]>([]);
+  const { addresses } = useAddresses(!!user);
   const [selectedAddressId, setSelectedAddressId] = React.useState<string>("new");
   const [addressForm, setAddressForm] = React.useState<Partial<AddressInput>>(emptyAddress());
 
   React.useEffect(() => {
-    if (!user) return;
-    getAddresses()
-      .then((addrs) => {
-        setAddresses(addrs);
-        const def = addrs.find((a) => a.isDefaultShipping) ?? addrs[0];
-        if (def) {
-          setSelectedAddressId(def.id);
-          setAddressForm(def);
-        }
-      })
-      .catch(() => {});
-  }, [user]);
+    if (addresses.length === 0) return;
+    const def = addresses.find((a) => a.isDefaultShipping) ?? addresses[0];
+    setSelectedAddressId(def.id);
+    setAddressForm(def);
+  }, [addresses]);
 
   function selectSavedAddress(id: string | null) {
     if (!id) return;
@@ -95,6 +73,7 @@ export default function CheckoutPage() {
   const [password, setPassword] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [termsAccepted, setTermsAccepted] = React.useState(false);
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const selectedMethod = methods.find((m) => m.id === selectedMethodId) ?? null;
@@ -109,30 +88,16 @@ export default function CheckoutPage() {
   const [appliedPromoCode, setAppliedPromoCode] = React.useState("");
   const [giftCardCodeInput, setGiftCardCodeInput] = React.useState("");
   const [appliedGiftCardCode, setAppliedGiftCardCode] = React.useState("");
-  const [pricing, setPricing] = React.useState<PricingPreview | null>(null);
-  const [pricingLoading, setPricingLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!selectedMethodId || items.length === 0) return;
-    let cancelled = false;
-    setPricingLoading(true);
-    getPricingPreview({
-      items, shippingMethodId: selectedMethodId,
-      promoCode: appliedPromoCode || undefined, giftCardCode: appliedGiftCardCode || undefined,
-    })
-      .then((p) => {
-        if (!cancelled) setPricing(p);
-      })
-      .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Nie udało się obliczyć ceny.");
-      })
-      .finally(() => {
-        if (!cancelled) setPricingLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [items, selectedMethodId, appliedPromoCode, appliedGiftCardCode]);
+  const {
+    pricing,
+    loading: pricingLoading,
+    error: pricingError,
+  } = usePricingPreview({
+    items,
+    shippingMethodId: selectedMethodId,
+    promoCode: appliedPromoCode,
+    giftCardCode: appliedGiftCardCode,
+  });
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -148,6 +113,10 @@ export default function CheckoutPage() {
     }
     if (!user && createAccount && password.length < 6) {
       setError("Hasło musi mieć co najmniej 6 znaków.");
+      return;
+    }
+    if (!termsAccepted) {
+      setError("Aby złożyć zamówienie, musisz zaakceptować Regulamin.");
       return;
     }
 
@@ -295,7 +264,7 @@ export default function CheckoutPage() {
           {selectedMethod?.requiresPickupPoint ? (
             <section className="space-y-4">
               <h2 className="font-display text-lg">Wybór paczkomatu</h2>
-              <InPostGeowidget onSelect={setPickupPoint} />
+              <FurgonetkaMap onSelect={setPickupPoint} />
               {pickupPoint && (
                 <p className="text-sm text-muted-foreground">
                   Wybrany paczkomat: <span className="font-medium text-foreground">{pickupPoint.pointName}</span>
@@ -355,7 +324,7 @@ export default function CheckoutPage() {
             </section>
           )}
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {(error || pricingError) && <p className="text-sm text-destructive">{error ?? pricingError}</p>}
         </div>
 
         <div className="lg:sticky lg:top-24 lg:self-start">
@@ -438,7 +407,26 @@ export default function CheckoutPage() {
               <span>Do zapłaty</span>
               <span>{formatMinorUnits(pricing?.amountDue ?? subtotal)}</span>
             </div>
-            <Button type="submit" size="lg" className="w-full" disabled={submitting || pricingLoading}>
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="checkout-terms"
+                checked={termsAccepted}
+                onCheckedChange={(v) => setTermsAccepted(!!v)}
+              />
+              <Label htmlFor="checkout-terms" className="text-xs font-normal leading-relaxed text-muted-foreground">
+                Zapoznałem(-am) się i akceptuję{" "}
+                <Link href="/regulamin" target="_blank" className="text-foreground underline underline-offset-4">
+                  Regulamin
+                </Link>{" "}
+                sklepu, w tym informację o prawie odstąpienia od umowy.
+              </Label>
+            </div>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={submitting || pricingLoading || !termsAccepted}
+            >
               {submitting && <Loader2 className="size-4 animate-spin" />}
               Zapłać
             </Button>

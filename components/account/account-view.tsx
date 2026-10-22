@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
-import type { Order } from "@/types";
 import { useAuthStore } from "@/lib/auth";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useOrders } from "@/lib/hooks/use-orders";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -15,10 +15,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { OrderHistory } from "@/components/account/order-history";
 import { AddressBook } from "@/components/account/address-book";
 
-export function AccountView({ orders }: { orders: Order[] }) {
+export function AccountView() {
   const { user, isReady } = useRequireAuth("/login");
   const logout = useAuthStore((state) => state.logout);
   const router = useRouter();
+  const { orders, loading: ordersLoading } = useOrders();
 
   async function handleLogout() {
     await logout();
@@ -66,7 +67,7 @@ export function AccountView({ orders }: { orders: Order[] }) {
 
       <section className="space-y-5">
         <h2 className="font-display text-xl">Historia zamówień</h2>
-        <OrderHistory orders={orders} />
+        {ordersLoading ? <Skeleton className="h-32 w-full" /> : <OrderHistory orders={orders} />}
       </section>
     </div>
   );

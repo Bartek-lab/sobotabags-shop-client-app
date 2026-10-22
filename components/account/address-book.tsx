@@ -4,7 +4,7 @@ import * as React from "react";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { createAddress, deleteAddress, getAddresses, updateAddress } from "@/lib/addresses";
+import { useAddresses } from "@/lib/hooks/use-addresses";
 import type { Address, AddressInput } from "@/types";
 import { AddressFields, emptyAddress } from "@/components/checkout/address-fields";
 import { Button } from "@/components/ui/button";
@@ -21,27 +21,15 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AddressBook() {
-  const [addresses, setAddresses] = React.useState<Address[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const { addresses, loading, error: loadError, create, update, remove } = useAddresses();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<Address | null>(null);
   const [form, setForm] = React.useState<Partial<AddressInput>>(emptyAddress());
   const [saving, setSaving] = React.useState(false);
 
-  const load = React.useCallback(async () => {
-    setLoading(true);
-    try {
-      setAddresses(await getAddresses());
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Nie udało się wczytać adresów.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   React.useEffect(() => {
-    load();
-  }, [load]);
+    if (loadError) toast.error(loadError);
+  }, [loadError]);
 
   function openCreate() {
     setEditing(null);
@@ -63,13 +51,12 @@ export function AddressBook() {
     setSaving(true);
     try {
       if (editing) {
-        await updateAddress(editing.id, form as AddressInput);
+        await update(editing.id, form as AddressInput);
       } else {
-        await createAddress(form as AddressInput);
+        await create(form as AddressInput);
       }
       toast.success("Adres zapisany");
       setDialogOpen(false);
-      await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Nie udało się zapisać adresu.");
     } finally {
@@ -79,9 +66,8 @@ export function AddressBook() {
 
   async function handleDelete(id: string) {
     try {
-      await deleteAddress(id);
+      await remove(id);
       toast.success("Adres usunięty");
-      await load();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Nie udało się usunąć adresu.");
     }

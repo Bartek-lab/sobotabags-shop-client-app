@@ -25,6 +25,23 @@ type ViewState =
   | { kind: "error"; message: string };
 
 export default function CheckoutSuccessPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="size-10 animate-spin text-leather" />
+            <SectionHeading align="center" title="Potwierdzamy płatność..." />
+          </div>
+        </div>
+      }
+    >
+      <CheckoutSuccessContent />
+    </React.Suspense>
+  );
+}
+
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const orderNumberParam = searchParams.get("order_number");
