@@ -3,29 +3,34 @@ export function AboutStory() {
     <section className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       <div className="space-y-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
         <p>
-          Moja przygoda ze skórą zaczęła się właściwie przypadkiem — od starej, ręcznej maszyny do szycia
-          odziedziczonej po dziadku i pierwszego, niezdarnie uszytego portfela. Szybko okazało się, że to
-          coś więcej niż hobby: sposób myślenia o rzeczach, którymi się otaczamy. Wolę mieć jedną dobrą
-          torbę niż dziesięć przypadkowych.
+          Swoją przygodę z naturalnymi skórami rozpoczęłam w 2017 roku. Wiedzę przekazał mi duński
+          rzemieślnik, który przez dziesiątki lat tworzył ręcznie szyte, luksusowe meble ze skór
+          najwyższej jakości. Spędziłam wiele tygodni w Danii, ucząc się pod jego okiem selekcji skór i
+          precyzyjnej pracy z tym wyjątkowym materiałem.
         </p>
         <p>
-          Dziś każda torba KS powstaje w całości w mojej pracowni — od wyboru skóry, przez krój i
-          szycie, po ostatnie wykończenie krawędzi. Nie korzystam z podwykonawców ani masowej produkcji.
-          Wybieram skóry garbowane roślinnie, które starzeją się z godnością i z czasem nabierają własnego
-          charakteru — tak jak przedmioty, które naprawdę warto mieć na lata.
+          To był czas intensywnej nauki – zarówno teoretycznej, jak i praktycznej. Wtedy właśnie uszyłam
+          swoją pierwszą torebkę. Mam ją do dziś i wciąż przypomina mi, od czego wszystko się zaczęło.
         </p>
         <p>
-          Lubię, kiedy torba ma swoją historię — dlatego równie chętnie projektuję modele na indywidualne
-          zamówienie: dopasowane do Twoich potrzeb, koloru skóry, który lubisz, i detalu, który sprawia, że
-          rzecz staje się naprawdę Twoja.
+          Przez kolejne lata pielęgnowałam warsztat, doskonaliłam techniki i realizowałam własne projekty.
+          Dziś szyję i projektuję torebki w domowym studio – w małej skali, z pełną uwagą poświęconą
+          każdemu detalowi.
+        </p>
+        <p>
+          Cenię dbałość o detale i staranne wykończenie nawet w miejscach, których nie widać na pierwszy
+          rzut oka. Bo właśnie one decydują o trwałości i charakterze każdej torebki.
+        </p>
+        <p>Moje projekty i wykonanie są zgodne z filozofią slow fashion:</p>
+        <p className="font-medium text-foreground">
+          jakość ponad ilość, ponadczasowy design i prawdziwa trwałość.
+        </p>
+        <p>
+          Każda torebka powstaje w ograniczonej liczbie. Nie produkuję masowo – szyję samodzielnie, z
+          dbałością o każdy ścieg. Dzięki temu masz pewność, że kupujesz coś wyjątkowego – ręcznie
+          stworzony przedmiot, który będzie Ci służył przez lata.
         </p>
       </div>
-      <blockquote className="mt-10 border-l-2 border-leather pl-6 font-display text-2xl leading-snug text-balance italic text-foreground sm:text-3xl">
-        „Każda torba, która wychodzi z mojej pracowni, niesie w sobie kawałek mnie.”
-        <footer className="mt-3 font-sans text-sm font-medium not-italic text-muted-foreground">
-          — Karolina Sobota
-        </footer>
-      </blockquote>
     </section>
   );
 }
