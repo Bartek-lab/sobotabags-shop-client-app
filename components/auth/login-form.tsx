@@ -40,7 +40,12 @@ export function LoginForm() {
         <Input id="email" name="email" type="email" placeholder="jan.kowalski@example.com" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Hasło</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Hasło</Label>
+          <Link href="/forgot-password" className="text-xs text-muted-foreground hover:underline">
+            Nie pamiętasz hasła?
+          </Link>
+        </div>
         <Input id="password" name="password" type="password" placeholder="••••••••" required />
       </div>
 

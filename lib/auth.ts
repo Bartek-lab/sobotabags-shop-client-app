@@ -31,6 +31,8 @@ interface AuthState {
   login: (input: LoginInput) => Promise<User>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 // Deliberately NOT zustand/persist: Supabase's own client already persists
@@ -90,5 +92,29 @@ export const useAuthStore = create<AuthState>()((set) => ({
     const supabase = createClient();
     await supabase.auth.signOut();
     set({ user: null });
+  },
+
+  // Supabase's own flow: this sends an email with a link back to
+  // /reset-password?... -- the recovery token lives in the URL fragment,
+  // which never reaches the server, so no backend involvement needed here
+  // beyond this one call. Deliberately doesn't throw/surface "email not
+  // found" as a distinct case -- Supabase itself returns success either
+  // way to avoid letting this form be used to enumerate registered emails.
+  requestPasswordReset: async (email) => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw new Error(error.message);
+  },
+
+  // Only valid right after following the reset-password email link --
+  // Supabase's client SDK exchanges the URL fragment into a temporary
+  // "recovery" session automatically on that page load, which is what
+  // authorizes this call.
+  updatePassword: async (newPassword) => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw new Error(error.message);
   },
 }));

@@ -195,3 +195,13 @@ export interface PickupPoint {
   lastName: string;
   phone: string | null;
 }
+
+export type ContactTopic = "zamowienie-indywidualne" | "pytanie-o-produkt" | "zamowienie-i-dostawa" | "inne";
+
+export interface ContactInput {
+  name: string;
+  email: string;
+  phone?: string;
+  topic: ContactTopic;
+  message: string;
+}

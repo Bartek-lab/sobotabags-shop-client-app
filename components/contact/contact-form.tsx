@@ -4,7 +4,7 @@ import * as React from "react";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 
-import { mockSubmitContactForm, type ContactTopic } from "@/lib/contact";
+import { submitContactForm, type ContactTopic } from "@/lib/contact";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +37,7 @@ export function ContactForm() {
 
     setIsSubmitting(true);
     try {
-      const { ticketId } = await mockSubmitContactForm({
+      const { ticketId } = await submitContactForm({
         name: String(formData.get("name") ?? ""),
         email: String(formData.get("email") ?? ""),
         phone: String(formData.get("phone") ?? ""),
@@ -108,10 +108,6 @@ export function ContactForm() {
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         Wyślij wiadomość
       </Button>
-
-      <p className="text-center text-xs text-muted-foreground">
-        Formularz demonstracyjny — wiadomości nie są jeszcze wysyłane na żaden adres e-mail.
-      </p>
     </form>
   );
 }
