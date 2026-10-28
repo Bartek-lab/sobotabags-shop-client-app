@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/shared/theme-provider";
 import { PageTransition } from "@/components/shared/page-transition";
 import { AuthInitializer } from "@/components/shared/auth-initializer";
 import { Toaster } from "@/components/ui/sonner";
+import { getAllCategories } from "@/lib/products";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,11 +32,16 @@ export const metadata: Metadata = {
     "KS to marka ręcznie robionych skórzanych toreb premium. Torby damskie i męskie szyte z najwyższej jakości skóry naturalnej w Polsce.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Best-effort: the nav shouldn't take the whole site down if shop-api is
+  // briefly unreachable -- it just falls back to no category links that one
+  // request.
+  const categories = await getAllCategories().catch(() => []);
+
   return (
     <html
       lang="pl"
@@ -45,7 +51,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthInitializer />
-          <Navbar />
+          <Navbar categories={categories} />
           <main className="flex-1">
             <PageTransition>{children}</PageTransition>
           </main>
