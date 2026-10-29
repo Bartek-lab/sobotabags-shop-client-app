@@ -68,12 +68,14 @@ export async function fetchCategories(): Promise<RawCategory[]> {
 
 export interface ProductListParams {
   category?: string;
+  bestseller?: boolean;
   sort: SortOption;
 }
 
 export async function fetchProducts(params: ProductListParams): Promise<RawProductListItem[]> {
   const query = new URLSearchParams();
   if (params.category) query.set("category", params.category);
+  if (params.bestseller) query.set("bestseller", "true");
   query.set("sort", params.sort);
 
   const res = await publicFetch(`/products?${query.toString()}`, { next: { revalidate: 60 } });

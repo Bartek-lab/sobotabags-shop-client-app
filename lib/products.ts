@@ -16,13 +16,14 @@ export async function getAllCategories(): Promise<Category[]> {
 export interface ProductFilters {
   /** category slug */
   category?: string;
+  bestseller?: boolean;
 }
 
 export async function getFilteredProducts(
   filters: ProductFilters = {},
   sort: SortOption = "newest"
 ): Promise<ProductSummary[]> {
-  const data = await fetchProducts({ category: filters.category, sort });
+  const data = await fetchProducts({ category: filters.category, bestseller: filters.bestseller, sort });
   return data.map(mapProductSummary);
 }
 
@@ -30,11 +31,11 @@ export async function getAllProducts(): Promise<ProductSummary[]> {
   return getFilteredProducts();
 }
 
-// "Featured" isn't backed by any real flag in the schema (see api-shop's own
-// comment on this) -- newest-first is the honest stand-in, same choice made
-// on the server side for the default sort.
+// Backed by the "bestseller" product attribute (boolean, product-level) --
+// set per-product in the admin panel. Newest-first among bestsellers, same
+// default used elsewhere.
 export async function getFeaturedProducts(limit = 4): Promise<ProductSummary[]> {
-  const products = await getFilteredProducts({}, "newest");
+  const products = await getFilteredProducts({ bestseller: true }, "newest");
   return products.slice(0, limit);
 }
 
