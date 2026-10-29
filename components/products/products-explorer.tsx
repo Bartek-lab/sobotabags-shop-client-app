@@ -43,6 +43,29 @@ export function ProductsExplorer({
     router.push(`${pathname}?${params.toString()}`);
   }
 
+  const topLevelCategories = categories.filter((cat) => !cat.parentId);
+  const childrenByParent = new Map<string, Category[]>();
+  for (const cat of categories) {
+    if (!cat.parentId) continue;
+    childrenByParent.set(cat.parentId, [...(childrenByParent.get(cat.parentId) ?? []), cat]);
+  }
+
+  function categoryButton(cat: Category, { indent = false } = {}) {
+    return (
+      <button
+        key={cat.id}
+        onClick={() => updateParam("category", cat.slug)}
+        className={`rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors ${indent ? "ml-3" : ""} ${
+          activeCategory === cat.slug
+            ? "bg-secondary font-medium text-foreground"
+            : "text-muted-foreground hover:bg-muted"
+        }`}
+      >
+        {cat.name}
+      </button>
+    );
+  }
+
   const filterPanel = (
     <div className="space-y-3">
       <h3 className="text-sm font-medium">Kategoria</h3>
@@ -57,18 +80,11 @@ export function ProductsExplorer({
         >
           Wszystkie
         </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => updateParam("category", cat.slug)}
-            className={`rounded-sm px-2.5 py-1.5 text-left text-sm transition-colors ${
-              activeCategory === cat.slug
-                ? "bg-secondary font-medium text-foreground"
-                : "text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            {cat.name}
-          </button>
+        {topLevelCategories.map((cat) => (
+          <div key={cat.id} className="flex flex-col gap-1.5">
+            {categoryButton(cat)}
+            {(childrenByParent.get(cat.id) ?? []).map((child) => categoryButton(child, { indent: true }))}
+          </div>
         ))}
       </div>
     </div>
