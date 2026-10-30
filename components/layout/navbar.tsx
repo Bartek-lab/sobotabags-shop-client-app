@@ -22,7 +22,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useAuthStore } from "@/lib/auth";
 import { useCartCount } from "@/lib/cart";
 import { cn } from "@/lib/utils";
-import type { Category } from "@/types";
 
 const NAV_LINKS = [
   { href: "/products", label: "Sklep" },
@@ -30,20 +29,13 @@ const NAV_LINKS = [
   { href: "/contact", label: "Kontakt" },
 ];
 
-export function Navbar({ categories = [] }: { categories?: Category[] }) {
+export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const cartCount = useCartCount();
   const [open, setOpen] = React.useState(false);
-
-  const topLevelCategories = categories.filter((c) => !c.parentId);
-  const childrenByParent = new Map<string, Category[]>();
-  for (const c of categories) {
-    if (!c.parentId) continue;
-    childrenByParent.set(c.parentId, [...(childrenByParent.get(c.parentId) ?? []), c]);
-  }
 
   async function handleLogout() {
     await logout();
@@ -69,43 +61,6 @@ export function Navbar({ categories = [] }: { categories?: Category[] }) {
                 {link.label}
               </Link>
             ))}
-            {topLevelCategories.map((category) => {
-              const children = childrenByParent.get(category.id) ?? [];
-              if (children.length === 0) {
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/products?category=${category.slug}`}
-                    className="text-sm tracking-wide text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {category.name}
-                  </Link>
-                );
-              }
-              return (
-                <DropdownMenu key={category.id}>
-                  <DropdownMenuTrigger
-                    render={
-                      <button className="text-sm tracking-wide text-muted-foreground transition-colors hover:text-foreground">
-                        {category.name}
-                      </button>
-                    }
-                  />
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem
-                      render={<Link href={`/products?category=${category.slug}`}>Wszystkie</Link>}
-                    />
-                    <DropdownMenuSeparator />
-                    {children.map((child) => (
-                      <DropdownMenuItem
-                        key={child.id}
-                        render={<Link href={`/products?category=${child.slug}`}>{child.name}</Link>}
-                      />
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              );
-            })}
           </nav>
         </div>
 
@@ -180,27 +135,6 @@ export function Navbar({ categories = [] }: { categories?: Category[] }) {
                   >
                     {link.label}
                   </Link>
-                ))}
-                {topLevelCategories.map((category) => (
-                  <React.Fragment key={category.id}>
-                    <Link
-                      href={`/products?category=${category.slug}`}
-                      onClick={() => setOpen(false)}
-                      className="rounded-md px-2 py-2.5 text-sm text-foreground/90 hover:bg-muted"
-                    >
-                      {category.name}
-                    </Link>
-                    {(childrenByParent.get(category.id) ?? []).map((child) => (
-                      <Link
-                        key={child.id}
-                        href={`/products?category=${child.slug}`}
-                        onClick={() => setOpen(false)}
-                        className="rounded-md py-2 pl-6 pr-2 text-sm text-muted-foreground hover:bg-muted"
-                      >
-                        {child.name}
-                      </Link>
-                    ))}
-                  </React.Fragment>
                 ))}
                 <div className="my-2 border-t border-border" />
                 {user ? (
